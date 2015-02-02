@@ -13,7 +13,7 @@ class MEMM(object):
 		self.func = feature_functions
 		self.all_y = list(set(Y))
 		self.param = param
-		self.reg = 0
+		self.reg = reg
 		self.dim = len(self.func)
 
 		print 'Preprocessing for gradient'
