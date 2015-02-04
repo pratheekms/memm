@@ -4,17 +4,20 @@ import itertools
 import datetime
 from scipy.optimize import minimize as mymin 
 
+###########################
+# leave out gradient for now.
+##########################
 
 class MEMM(object):
 	"""docstring for MEMM"""
 	def __init__(self, X, Y, param, feature_functions, reg):
-		self.X = X
-		self.Y = Y
-		self.func = feature_functions
-		self.all_y = list(set(Y))
-		self.param = param
-		self.reg = 0
-		self.dim = len(self.func)
+		self.X = X 	# input set
+		self.Y = Y 	# label for input set
+		self.func = feature_functions 	# array of feature functions
+		self.all_y = list(set(Y)) # all possible outputs. basically set(Y)
+		self.param = param # parameter vector. this is what we get after training
+		self.reg = 0 # regularization term. dont bother about it for now. i'll explain in detail later.
+		self.dim = len(self.func) 
 
 		print 'Preprocessing for gradient'
 		self.dataset = []
@@ -36,6 +39,14 @@ class MEMM(object):
 		return
 	
 	def p_y_given_x(self,x,y):
+		''' This is the probability distribution.
+		x,y are inputs given by the user.
+		y belongs to a set of possible outputs self.all_y
+		dot product of feature vector(refer get_features) and the parameter vector is computed for the numerator
+		same is repeated for self.all_y
+		basically its (x,y)/(x,all_y)
+
+	'''
 		features = self.get_features(x, y)
 		numerator = math.exp(numpy.dot(features, self.param))
 
@@ -48,10 +59,20 @@ class MEMM(object):
 		return numerator/denominator
 		
 	def get_features(self, x, y):
+		'''
+		applies the features functions to given inputs x and y.
+		Returns a vecor.
+		if there are 10 feature functions it'll return a vector of length 10 
+		'''
 		return [f(x,y) for f in self.func]
 
 	
 	def cost(self, params):
+		'''
+		the cost function is the derivative of the p_y_given_x probability distribution summed over all inputs.
+		i'll send the formula in hangout. 
+
+		'''
 		self.param = params
 		sum_sqr_params = sum([p * p for p in params]) # for regularization
 		reg_term = 0.5 * self.reg * sum_sqr_params
@@ -74,7 +95,10 @@ class MEMM(object):
 	def train(self):
 		dt1 = datetime.datetime.now()
 		print 'before training: ', dt1
-		params = mymin(self.cost, self.param, method = 'L-BFGS-B',options = {'maxiter':5}) #, jac = self.gradient) # , options = {'maxiter':100}
+		# this is the optimization function. spark already has this one. we'll use that.
+		# it takes cost, parameter vector and modifies the parameter vector. the process continues
+		# untill training is complete
+		params = mymin(self.cost, self.param, method = 'L-BFGS-B', jac = self.gradient,options = {'maxiter':5}) #, jac = self.gradient) # , options = {'maxiter':100}
 		self.param = params.x
 		dt2 = datetime.datetime.now()
 		print 'after training: ', dt2, '  total time = ', (dt2 - dt1).total_seconds()
