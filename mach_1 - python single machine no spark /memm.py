@@ -16,8 +16,9 @@ class MEMM(object):
 		self.func = feature_functions 	# array of feature functions
 		self.all_y = list(set(Y)) # all possible outputs. basically set(Y)
 		self.param = param # parameter vector. this is what we get after training
-		self.reg = 0 # regularization term. dont bother about it for now. i'll explain in detail later.
+		self.reg = reg # regularization term. dont bother about it for now. i'll explain in detail later.
 		self.dim = len(self.func) 
+
 
 		print 'Preprocessing for gradient'
 		self.dataset = []
