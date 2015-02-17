@@ -17,7 +17,28 @@ def create_dataset():
 		prev_prev = None
 		for j,word in enumerate(sentence):
 			datapoint = {}
-			datapoint['wn'] = sents[i]
+			temp = []
+			len_sentence = len(sentence)
+
+			temp.append(sents[i][j])
+			if(j > 0):
+				temp.append(sents[i][j-1])
+			else:
+				temp.append('*')
+			if(j > 1):
+				temp.append(sents[i][j-2])
+			else:
+				temp.append('*')
+			if(j < len_sentence-1):
+				temp.append(sents[i][j+1])
+			else:
+				temp.append('*')
+			if(j < len_sentence-2):
+				temp.append(sents[i][j+2])
+			else:
+				temp.append('*')
+
+			datapoint['wn'] = temp
 			
 			datapoint['index'] = j
 			if(prev == None):
@@ -31,6 +52,7 @@ def create_dataset():
 
 			prev_prev = prev
 			prev = word
+			# print datapoint,word[1]
 			dataset.append(datapoint)
 			tags.append(word[1])
 	print 'Done'
@@ -70,15 +92,22 @@ def f10(x,y):
 
 if __name__ == '__main__':
 	data,tag = create_dataset()
+	tag1 = list(set(tag))
+	punctuations = ['.', ',', ':',';','\"','\'','``','\'\'']
+	all_tag = []
+	for t in tag1:
+		if t not in punctuations:
+			all_tag.append(t)
+
 	param = [0 for i in range(10)]
 	print 'Profiling started'
-	prof = cProfile.Profile()
-	prof.enable()
-	memm = MEMM(data, tag, param, [f1,f2,f3,f4,f5,f6,f7,f8,f9,f10], 0)
+	# prof = cProfile.Profile()
+	# prof.enable()
+	memm = MEMM(data, tag, all_tag,param, [f1,f2,f3,f4,f5,f6,f7,f8,f9,f10], 0)
 	memm.train()
-	prof.disable()
-	s = StringIO.StringIO()
-	sortby = 'cumulative'
-	ps = pstats.Stats(prof, stream=s).sort_stats(sortby)
-	ps.print_stats()
-	print s.getvalue()
+	# prof.disable()
+	# s = StringIO.StringIO()
+	# sortby = 'cumulative'
+	# ps = pstats.Stats(prof, stream=s).sort_stats(sortby)
+	# ps.print_stats()
+	# print s.getvalue()

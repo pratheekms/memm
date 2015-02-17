@@ -10,11 +10,11 @@ from scipy.optimize import minimize as mymin
 
 class MEMM(object):
 	"""docstring for MEMM"""
-	def __init__(self, X, Y, param, feature_functions, reg):
+	def __init__(self, X, Y, all_y,param, feature_functions, reg):
 		self.X = X 	# input set
 		self.Y = Y 	# label for input set
 		self.func = feature_functions 	# array of feature functions
-		self.all_y = list(set(Y)) # all possible outputs. basically set(Y)
+		self.all_y = all_y # all possible outputs. basically set(Y)
 		self.param = param # parameter vector. this is what we get after training
 		self.reg = reg # regularization term. dont bother about it for now. i'll explain in detail later.
 		self.dim = len(self.func) 
@@ -36,6 +36,7 @@ class MEMM(object):
 		self.dataset = numpy.array(self.dataset)
 
 		self.num_examples = len(self.X)
+		print self.num_examples,len(self.all_y)
 		print 'Done'
 		return
 	
@@ -99,13 +100,14 @@ class MEMM(object):
 		# this is the optimization function. spark already has this one. we'll use that.
 		# it takes cost, parameter vector and modifies the parameter vector. the process continues
 		# untill training is complete
-		params = mymin(self.cost, self.param, method = 'L-BFGS-B', jac = self.gradient,options = {'maxiter':5}) #, jac = self.gradient) # , options = {'maxiter':100}
-		self.param = params.x
+		# params = mymin(self.cost, self.param, method = 'L-BFGS-B', jac = self.gradient,options = {'maxiter':5}) #, jac = self.gradient) # , options = {'maxiter':100}
+		# self.param = params.x
+		self.gradient(self.param)
 		dt2 = datetime.datetime.now()
 		print 'after training: ', dt2, '  total time = ', (dt2 - dt1).total_seconds()
 
 	def gradient(self, params):
-		self.param = params        
+		self.param = params
 		gradient = []
 		for k in range(self.dim): # vk is a m dimensional vector
 			reg_term = self.reg * params[k]
